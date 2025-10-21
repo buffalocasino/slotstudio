@@ -1,4 +1,4 @@
-import type { Cell, EngineConfig, GridSize, SymbolId, Win } from "./types";
+import type { Bonus, Cell, EngineConfig, GridSize, SymbolId, Win } from "./types";
 
 function seededRng(seed: number) {
   // simple xorshift-ish
@@ -18,7 +18,7 @@ export class SlotEngine {
   rng: () => number;
   spinning = false;
   cascadesInChain = 0;
-  bonuses: any[] = [];
+  bonuses: Bonus[] = [];
 
   constructor(cfg?: Partial<EngineConfig>) {
     this.config = {
@@ -60,8 +60,16 @@ export class SlotEngine {
     this.config.symbolWeights = { ...this.config.symbolWeights, ...weights };
   }
 
-  registerBonus(bonus: any) {
+  registerBonus(bonus: Bonus) {
     this.bonuses.push(bonus);
+  }
+
+  setBonuses(bonuses: Bonus[]) {
+    this.bonuses = [...bonuses];
+  }
+
+  clearBonuses() {
+    this.bonuses = [];
   }
 
   private pickRandomSymbol(): SymbolId {

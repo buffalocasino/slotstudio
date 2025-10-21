@@ -1,13 +1,13 @@
 import { writable, derived } from "svelte/store";
 import { SlotEngine } from "../engine/SlotEngine";
-import type { GridSize, SpinStyle } from "../engine/types";
+import type { Bonus, GridSize, SpinStyle } from "../engine/types";
 import { FreeSpinsBonus } from "../bonuses/FreeSpinsBonus";
 import { MultiplierBonus } from "../bonuses/MultiplierBonus";
 
 const engine = new SlotEngine();
 
-engine.registerBonus(new FreeSpinsBonus());
-engine.registerBonus(new MultiplierBonus());
+const defaultBonuses: Bonus[] = [new FreeSpinsBonus(), new MultiplierBonus()];
+engine.setBonuses(defaultBonuses);
 
 export const spinStyle = writable<SpinStyle>(engine.config.spinStyle);
 export const gridSize = writable<GridSize>(engine.config.grid);
@@ -17,11 +17,22 @@ export const fallSpeed = writable<number>(engine.config.fallSpeed);
 export const gridSnapshot = writable(engine.getSnapshot());
 export const isSpinning = writable(false);
 
+export function setGridSize(size: GridSize) {
+  if (
+    size.cols <= 0 ||
+    size.rows <= 0 ||
+    (size.cols === engine.config.grid.cols && size.rows === engine.config.grid.rows)
+  ) {
+    return;
+  }
+  engine.setGrid(size);
+  gridSize.set({ ...size });
+  gridSnapshot.set(engine.getSnapshot());
+}
+
 export function setGridPreset(preset: "5x3" | "5x4") {
   const [cols, rows] = preset === "5x3" ? [5, 3] : [5, 4];
-  engine.setGrid({ cols, rows });
-  gridSize.set({ cols, rows });
-  gridSnapshot.set(engine.getSnapshot());
+  setGridSize({ cols, rows });
 }
 
 export function setSpinStyle(v: SpinStyle) {
@@ -44,3 +55,7 @@ export async function doSpin() {
 }
 
 export const engineRef = derived([], () => engine);
+
+export function setEngineBonuses(bonuses: Bonus[]) {
+  engine.setBonuses(bonuses);
+}
