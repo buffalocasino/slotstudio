@@ -24,6 +24,10 @@ export let backgroundStyle: string | null = null;
 export let overlays: ViewerOverlay[] = [];
 export let nearHitAnimation = "pulse";
 export let nearHitLabel = "Near Hit";
+export let credits = 0;
+export let bet = 0;
+export let lastWin = 0;
+export let spinCount = 0;
 
 const dispatch = createEventDispatcher<{ assign: { col: number; row: number; assetPath: string } }>();
 
@@ -50,6 +54,10 @@ let overlayEntries: Array<
 > = [];
 let nearHitAnimationClass = "";
 let containerBackground = "#1e1e1e";
+let formattedCredits = "0";
+let formattedBet = "0.00";
+let formattedLastWin = "0.00";
+let formattedSpins = "0";
 
 let viewWidth = cols * symbolSize;
 let viewHeight = rows * symbolSize;
@@ -72,6 +80,14 @@ function classFriendly(value: string) {
 
 function overlayPositionClass(position: OverlayPosition) {
 	return POSITION_CLASS_MAP[position] ?? POSITION_CLASS_MAP["bottom-right"];
+}
+
+function formatNumber(value: number, options: Intl.NumberFormatOptions = {}) {
+	return new Intl.NumberFormat("en-US", {
+		minimumFractionDigits: options.minimumFractionDigits ?? 0,
+		maximumFractionDigits: options.maximumFractionDigits ?? 0,
+		...options
+	}).format(value);
 }
 
 function assetLabel(path: string) {
@@ -338,6 +354,10 @@ function assetLabel(path: string) {
 	}));
 
 	$: nearHitAnimationClass = classFriendly(nearHitAnimation);
+	$: formattedCredits = formatNumber(credits, { maximumFractionDigits: 0 });
+	$: formattedBet = formatNumber(bet, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+	$: formattedLastWin = formatNumber(lastWin, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+	$: formattedSpins = formatNumber(spinCount, { maximumFractionDigits: 0 });
 </script>
 
 <div
@@ -425,15 +445,19 @@ function assetLabel(path: string) {
 						<div class="ui-balance">
 							<div class="row">
 								<span class="label">Credits</span>
-								<span class="value">12,345</span>
+								<span class="value">{formattedCredits}</span>
 							</div>
 							<div class="row">
 								<span class="label">Bet</span>
-								<span class="value">2.50</span>
+								<span class="value">{formattedBet}</span>
 							</div>
 							<div class="row">
-								<span class="label">Win</span>
-								<span class="value highlight">150.00</span>
+								<span class="label">Last Win</span>
+								<span class="value highlight">{formattedLastWin}</span>
+							</div>
+							<div class="row">
+								<span class="label">Spins</span>
+								<span class="value">{formattedSpins}</span>
 							</div>
 						</div>
 					{:else if overlay.id === "loading-screen"}

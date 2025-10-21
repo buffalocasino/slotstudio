@@ -572,12 +572,23 @@ $: {
 	$: overlaySummaries = uiOverlays.map((overlay) => {
 		const template = resolveOverlayTemplate(overlay.id);
 		const variantMeta = template?.variants.find((variant) => variant.id === overlay.variant);
+		const allowedPositions =
+			template?.allowedPositions?.length && template.allowedPositions.includes(overlay.position)
+				? template.allowedPositions
+				: template?.allowedPositions?.length
+				? template.allowedPositions
+				: [overlay.position];
+		const variants = template?.variants?.length
+			? template.variants
+			: [{ id: overlay.variant, label: overlay.variant }];
 		return {
 			...overlay,
 			label: template?.label ?? overlay.id,
 			description: template?.description ?? "",
 			variantLabel: variantMeta?.label ?? overlay.variant,
-			variantDescription: variantMeta?.description
+			variantDescription: variantMeta?.description,
+			allowedPositions,
+			variants
 		};
 	});
 
@@ -1639,6 +1650,10 @@ onDestroy(() => {
 					overlays={activeOverlaySummaries}
 					nearHitAnimation={nearHitAnimation}
 					nearHitLabel={nearHitLabel}
+					credits={credits}
+					bet={betAmount}
+					lastWin={lastWinAmount}
+					spinCount={totalSpins}
 					assignments={cellAssignments}
 					on:assign={handleCellAssign}
 				/>
